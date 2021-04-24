@@ -1,0 +1,47 @@
+#include "utils.h"
+#include "commands.h"
+
+int main(int argc, char **argv)
+{
+    char command;
+    AccountType accountType;
+
+    accountType = login();
+
+    command = showMenu(accountType);
+
+    while (command != '0')
+    {
+        switch (command)
+        {
+        case '1':
+            addExperience();
+            break;
+        case '2':
+            listPeopleByMajor();
+            break;
+        case '3':
+            listPeopleBySkill();
+            break;
+        case '4':
+            listPeopleByGradYear();
+            break;
+        case '5':
+            listAll();
+            break;
+        case '6':
+            retrieveProfileInfo();
+            break;
+        case '7':
+            deleteProfile();
+            break;
+        case '8':
+            registerProfile();
+            break;
+        default:
+            break;
+        }
+
+        command = showMenu(accountType);
+    }
+}

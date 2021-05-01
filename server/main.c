@@ -15,6 +15,8 @@
 #include <sys/wait.h>
 #include <signal.h>
 
+#include "server.h"
+
 #define PORT "3490" // the port users will be connecting to
 
 #define BACKLOG 10 // how many pending connections queue will hold
@@ -136,7 +138,9 @@ int main(void)
             // this is the child process
             close(sockfd); // child doesn't need the listener
 
-            // TODO: handle request
+            // the server only handles one request per connection.
+            // if the user wants to make more requests it should initiate other connections.
+            handle_request(new_fd);
 
             if (send(new_fd, "Hello, world!", 13, 0) == -1)
                 perror("send");

@@ -1,13 +1,15 @@
 all: client.x server.x
 .PHONY: all
 
-client.x: $(shell find client -type f)
+client.x:
 	$(MAKE) --directory client
 	cp client/client.x ./client.x
+.PHONY: client.x
 
-server.x: $(shell find server -type f)
+server.x:
 	$(MAKE) --directory server
 	cp server/server.x ./server.x
+.PHONY: server.x
 
 clean:
 	$(MAKE) clean --directory client

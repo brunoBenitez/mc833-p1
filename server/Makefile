@@ -1,3 +1,15 @@
+CC = gcc
+CC_FLAGS = -std=c11 -pedantic -Wall -I..
 
-all: main.o
+all: server.x
 .PHONY: all
+
+server.x: main.o database.o server.o
+	$(CC) $(CC_FLAGS) $^ -o $@
+
+%.o: %.c %.h
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
+clean:
+	rm -f *.o server.x
+.PHONY: clean

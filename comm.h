@@ -1,3 +1,5 @@
+#pragma once
+
 #include <inttypes.h>
 
 #define MAX_CHARS 128

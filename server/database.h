@@ -1,3 +1,5 @@
+#pragma once
+
 #include "comm.h"
 
 // creates an entry for profile in database

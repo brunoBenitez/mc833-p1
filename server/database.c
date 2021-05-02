@@ -143,7 +143,7 @@ int read_db(UserProfile **profile)
                 fgets(users[u_idx].habilidades, sizeof users[u_idx].habilidades, current_file);
 
                 // get the subsequent line as work experience
-                for (n_exp = 0; fgets(users[u_idx].experiencia[n_exp], MAX_CHARS, current_file) && n_exp < MAX_EXP; n_exp);
+                for (n_exp = 0; fgets(users[u_idx].experiencia[n_exp], MAX_CHARS, current_file) && n_exp < MAX_EXP; n_exp++);
                 users[u_idx].n_experiencia = htonl(n_exp);
 
                 fclose(current_file);

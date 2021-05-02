@@ -2,6 +2,8 @@
 #include "commands.h"
 #include "comm.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 void addExperience(void)
 {
@@ -16,7 +18,7 @@ void addExperience(void)
     comando.op = UPDATE;
     comando.profiles_num = 1;
 
-    puts("Voce escolheu *ADICIONAR EXPERIENCIA*. Forneca um email seguido de apenas uma experiencia\n");
+    puts("Voce escolheu *ADICIONAR EXPERIENCIA*. Por favor, forneca um email seguido de apenas uma experiencia\n");
     scanf("%s", input.email);
     scanf("%s", input.experiencia[0]);
     client_connect(comando, input, 0); // Alterar o ponteiro para int de forma adequada
@@ -36,7 +38,7 @@ void listPeopleByMajor(void)
     int count = 0;
     int *n_profiles = malloc(sizeof(int));
 
-    puts("Voce escolheu *LISTAR POR FORMACAO*. Fornceca uma formacao\n");
+    puts("Voce escolheu *LISTAR POR FORMACAO*. Por favor, forneca uma formacao\n");
     comando.op = READ;
     scanf("%s", input.formacao);
     output = client_connect(comando, input, n_profiles);
@@ -67,14 +69,14 @@ void listPeopleBySkill(void)
     int count = 0;
     int *n_profiles = malloc(sizeof(int));
 
-    puts("Voce escolheu *LISTAR POR HABILIDADE*. Fornceca uma habilidade\n");
+    puts("Voce escolheu *LISTAR POR HABILIDADE*. Por favor, forneca uma habilidade\n");
     comando.op = READ;
     scanf("%s", input.habilidades);
     output = client_connect(comando, input, n_profiles);
 
     for (int i = 0; i < *n_profiles; i++)
     {
-        if (strcmp(output[i].habilidades, input.habilidades) == 0) // Procurar substring?
+        if (strstr(output[i].habilidades, input.habilidades) != NULL) // Procura substring
         {
             printf("*****\nEmail: %s\nNome: %s\n", output[i].email, output[i].nome);
             count++;
@@ -98,9 +100,9 @@ void listPeopleByGradYear(void)
     int count = 0;
     int *n_profiles = malloc(sizeof(int));
 
-    puts("Voce escolheu *LISTAR POR ANO DE FORMATURA*. Fornceca um ano\n");
+    puts("Voce escolheu *LISTAR POR ANO DE FORMATURA*. Por favor, forneca um ano\n");
     comando.op = READ;
-    scanf("%d", &input.ano_formatura);
+    scanf("%u", &input.ano_formatura);
     output = client_connect(comando, input, n_profiles);
 
     for (int i = 0; i < *n_profiles; i++)
@@ -220,6 +222,22 @@ void deleteProfile(void)
     // TODO:
     // 1) get input: email (string?)
     // 2) send deletion request to server
+    UserProfile input;
+    ProtocolData comando;
+    //UserProfile *output;
+    int *n_profiles = malloc(sizeof(int));
+
+    puts("Voce escolheu *EXCLUIR PERFIL*. Por favor, forneca um email\n");
+    scanf("%s", input.email);
+    comando.op = DELETE;
+    client_connect(comando, input, n_profiles);
+
+    if (1) // adicionar codigo de erro aqui
+    {
+        puts("Sucesso!\n");
+    } else{
+        puts("Falha!");
+    }
 }
 
 void registerProfile(void)
@@ -234,4 +252,41 @@ void registerProfile(void)
     //      - ano de formatura (int?string?)
     //      - habilidades
     //      - experiência
+    UserProfile input;
+    ProtocolData comando;
+    //UserProfile *output;
+    int *n_profiles = malloc(sizeof(int)); // Variavel coringa para n de profiles retornados. pode ser usada para erro?
+
+    puts("Voce escolheu *ADICIONAR NOVO PERFIL*. Por favor, forneca os dados conforme requisitado:\n");
+    puts("Email:\n");
+    scanf("%s", input.email);
+    puts("Nome:\n");
+    scanf("%s", input.nome);
+    puts("Sobrenome:\n");
+    scanf("%s", input.sobrenome);
+    puts("Residencia:\n");
+    scanf("%s", input.residencia);
+    puts("Formacao Academica:\n");
+    scanf("%s", input.formacao);
+    puts("Ano de formatura:\n");
+    scanf("%u", &input.ano_formatura);
+    puts("Habilidades:\n");
+    scanf("%s", input.habilidades);
+    puts("Quantas experiencias quer inserir? (0-20):\n");
+    scanf("%u", &input.n_experiencia);
+    for (int i = 0; i < input.n_experiencia; i++)
+    {
+        printf("Insira experiencia #%d:\n", i+1);
+        scanf("%s", input.experiencia[i]);
+    }
+    
+    comando.op = CREATE;
+    client_connect(comando, input, n_profiles);
+
+    if (1) // adicionar codigo de erro aqui
+    {
+        puts("Sucesso!\n");
+    } else{
+        puts("Falha!");
+    }
 }

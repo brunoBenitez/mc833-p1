@@ -1,5 +1,6 @@
 /*
-** server.c -- a stream socket server demo
+** main.c -- a stream socket server
+** code from http://beej.us/guide/bgnet/html/
 */
 
 #include <stdio.h>

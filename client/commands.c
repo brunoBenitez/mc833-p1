@@ -236,7 +236,7 @@ void deleteProfile(void)
     {
         puts("Sucesso!\n");
     } else{
-        puts("Falha!");
+        puts("Falha!\n");
     }
 }
 
@@ -287,6 +287,6 @@ void registerProfile(void)
     {
         puts("Sucesso!\n");
     } else{
-        puts("Falha!");
+        puts("Falha!\n");
     }
 }

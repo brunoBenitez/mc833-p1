@@ -1,10 +1,10 @@
 CC = gcc
-CC_FLAGS = -std=c11 -pedantic -Wall -I..
+CC_FLAGS = -std=gnu11 -pedantic -Wall -I..
 
 all: client.x
 .PHONY: all
 
-client.x: main.o commands.o utils.o
+client.x: main.c commands.o utils.o client.o
 	$(CC) $(CC_FLAGS) $^ -o $@
 
 %.o: %.c %.h

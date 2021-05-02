@@ -17,7 +17,7 @@ static void send_success(int sock_fd)
     send(sock_fd, &data, sizeof(ProtocolData), 0);
 }
 
-static void send_success(int sock_fd)
+static void send_error(int sock_fd)
 {
     ProtocolData data;
     data.op = htonl(ERROR);

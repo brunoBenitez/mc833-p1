@@ -6,6 +6,8 @@
 #define MAX_EXP 16
 
 typedef enum _operation {
+    ERROR = 0,
+    SUCCESS,
     CREATE,
     READ,
     UPDATE,

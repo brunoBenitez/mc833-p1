@@ -7,7 +7,7 @@ all: server.x
 server.x: main.c database.o server.o
 	$(CC) $(CC_FLAGS) $^ -o $@
 
-%.o: %.c %.h
+%.o: %.c
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
 clean:

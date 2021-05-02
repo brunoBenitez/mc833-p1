@@ -16,10 +16,10 @@ typedef struct _userProfile {
     char sobrenome[MAX_CHARS];
     char residencia[MAX_CHARS];
     char formacao[MAX_CHARS];
-    int32_t ano_formatura;
+    uint32_t ano_formatura;
     char habilidades[MAX_CHARS * 2];
     char experiencia[MAX_EXP][MAX_CHARS];
-    int32_t n_experiencia;
+    uint32_t n_experiencia;
 } UserProfile;
 
 typedef struct _protocolData {

@@ -7,8 +7,63 @@
 #include <error.h>
 #include <errno.h>
 #include <dirent.h>
+#include <assert.h>
+#include <netinet/in.h>
 
 #define GET_FILENAME(str, email) sprintf(str, "data/%s.db", email);
+
+// lists the filenames inside directory with dirname, the user need to release memory from namelist
+// returns the number of elements in namelist if succeeded, -1 if not
+static size_t get_dir_filenames(char *dirname, char ***namelist)
+{
+    DIR *data_dir;
+    struct dirent *dir_entry;
+    char **filenames;
+    size_t cap = 16;
+    size_t n_files = -1;
+
+    assert(dirname);
+    assert(namelist);
+
+    data_dir = opendir(dirname);
+    if (data_dir)
+    {
+        n_files = 0;
+        filenames = malloc(cap * sizeof(char));
+        // read ./data directory and store entries names on filename_list.
+        while ((dir_entry = readdir(data_dir)) != NULL)
+        {
+            if (n_files >= cap)
+            {
+                size_t new_size = cap * 2;
+                char **aux_buf = malloc(sizeof(char *) * new_size);
+                memcpy(aux_buf, filenames, cap);
+                cap = new_size;
+                free(filenames);
+                filenames = aux_buf;
+            }
+
+            char *cur_name = malloc(256 * sizeof(char));
+            strcpy(cur_name, dir_entry->d_name);
+            filenames[n_files] = cur_name;
+            n_files++;
+        }
+        closedir(data_dir);
+    }
+    *namelist = filenames;
+    return n_files;
+}
+
+// gets the email from the filename and place it in dest.
+// basically just remove the .db extension
+static void get_email_from_filename(char *dest, char *filename)
+{
+    assert(dest);
+    assert(filename);
+
+    char *last_point = strrchr(filename, '.');
+    strncpy(dest, filename, last_point - filename);
+}
 
 // creates an entry for profile in database
 // parameters:
@@ -17,7 +72,7 @@
 //  1 if succeeded, 0 if not
 int create_user(UserProfile *profile)
 {
-    char filename[MAX_CHARS];
+    char filename[256];
     FILE *db_file;
     int success = 1;
 
@@ -27,26 +82,23 @@ int create_user(UserProfile *profile)
         strcat(filename, profile->email);
         db_file = fopen(filename, "w");
 
-        flockfile(db_file);
-
         fprintf(db_file, "%s\n", profile->nome);
         fprintf(db_file, "%s\n", profile->sobrenome);
         fprintf(db_file, "%s\n", profile->residencia);
         fprintf(db_file, "%s\n", profile->formacao);
-        fprintf(db_file, "%s\n", profile->ano_formatura);
+        fprintf(db_file, "%u\n", ntohl(profile->ano_formatura));
         fprintf(db_file, "%s\n", profile->habilidades);
-        for (int32_t i = 0; i < profile->n_experiencia; i++)
+        for (int32_t i = 0; i < ntohl(profile->n_experiencia); i++)
         {
             fprintf(db_file, "%s\n", profile->experiencia[i]);
         }
 
-        funlockfile(db_file);
         fclose(db_file);
     }
     else
     {
         success = 0;
-        fprintf(stderr, "invalid profile received at: %s\n", __FUNCTION__);
+        fprintf(stderr, "invalid profile received at: create_user\n");
     }
 
     return success;
@@ -59,38 +111,56 @@ int create_user(UserProfile *profile)
 //  number of entries in array if succeeded, -1 if failed.
 int read_db(UserProfile **profile)
 {
-    DIR *data_dir;
-    struct dirent *dir_entry;
     FILE *current_file;
     UserProfile *users;
-    size_t n_files = 0;
+    size_t n_files, u_idx;
+    char **filenames;
+    char cur_filename[MAX_CHARS];
+    int32_t n_exp;
 
-    data_dir = opendir("data");
-    if (data_dir)
+    n_files = get_dir_filenames("./data", &filenames);
+    if (n_files > 0)
     {
-        while ((dir_entry = readdir(data_dir)) != NULL)
+        users = malloc(n_files * sizeof(UserProfile));
+        *profile = users;
+        u_idx = 0;
+        for (size_t i = 0; i < n_files; i++, u_idx++)
         {
-            dir_entry->d_name;
-            // TODO:
-            n_files++;
+            sprintf(cur_filename, "data/%s", filenames[i]);
+            current_file = fopen(cur_filename, "r");
+            if (current_file)
+            {
+                get_email_from_filename(users[u_idx].email, filenames[i]);
+
+                fgets(users[u_idx].nome, sizeof users[u_idx].nome, current_file);
+                fgets(users[u_idx].sobrenome, sizeof users[u_idx].sobrenome, current_file);
+                fgets(users[u_idx].residencia, sizeof users[u_idx].residencia, current_file);
+                
+                // get uint32_t from file
+                fscanf(current_file, "%u", &(users[u_idx].ano_formatura));
+                users[u_idx].ano_formatura = htonl(users[u_idx].ano_formatura);
+
+                fgets(users[u_idx].habilidades, sizeof users[u_idx].habilidades, current_file);
+
+                // get the subsequent line as work experience
+                for (n_exp = 0; fgets(users[u_idx].experiencia[n_exp], MAX_CHARS, current_file) && n_exp < MAX_EXP; n_exp);
+                users[u_idx].n_experiencia = htonl(n_exp);
+
+                fclose(current_file);
+            }
+            else
+            {
+                u_idx--;
+                fprintf(stderr, "db file not found while reading: %s\n", filenames[i]);
+            }
+
+            free(filenames[i]);
+            cur_filename[0] = '\0';
         }
-        closedir(data_dir);
-
-        // TODO:
-
-        flockfile(current_file);
-
-        // TODO:
-
-        funlockfile(current_file);
-    }
-    else
-    {
-        n_files = -1;
-        perror("Error opening directory \"data\" to read database");
+        free(filenames);
     }
 
-    return n_files;
+    return u_idx;
 }
 
 // updates a profile entry in database
@@ -100,7 +170,7 @@ int read_db(UserProfile **profile)
 //  1 if succeded, 0 if not
 int update_user(UserProfile *profile)
 {
-    char filename[MAX_CHARS];
+    char filename[256];
     FILE *db_file;
     int success = 1;
     if (profile)
@@ -112,11 +182,7 @@ int update_user(UserProfile *profile)
             db_file = freopen(NULL, "a", db_file);
             if (db_file)
             {
-                flockfile(db_file);
-
                 fputs(profile->experiencia[0], db_file);
-
-                funlockfile(db_file);
                 fclose(db_file);
             }
             else
@@ -124,7 +190,7 @@ int update_user(UserProfile *profile)
                 success = 0;
                 perror("error trying to reopen file to append");
             }
-                }
+        }
         else
         {
             success = 0;
@@ -134,7 +200,7 @@ int update_user(UserProfile *profile)
     else
     {
         success = 0;
-        fprintf(stderr, "invalid profile received at: %s\n", __FUNCTION__);
+        fprintf(stderr, "invalid profile received at: update_user\n");
     }
     return success;
 }
@@ -146,8 +212,7 @@ int update_user(UserProfile *profile)
 //  1 if succeeded, 0 if not.
 int delete_user(UserProfile *profile)
 {
-    char filename[MAX_CHARS];
-    FILE *db_file;
+    char filename[256];
     int success = 1;
     if (profile)
     {
@@ -161,7 +226,7 @@ int delete_user(UserProfile *profile)
     else
     {
         success = 0;
-        fprintf(stderr, "invalid profile received at: %s", __FUNCTION__);
+        fprintf(stderr, "invalid profile received at: delete_user");
     }
     return success;
 }

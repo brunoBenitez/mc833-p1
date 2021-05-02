@@ -13,3 +13,4 @@ int showMenu(AccountType accountType);
 AccountType login(void);
 
 // TODO: add functions to handle server connection
+UserProfile *client_connect(ProtocolData comando, UserProfile prof_buf, int *n_profiles);

@@ -29,13 +29,12 @@ int create_user(UserProfile *profile)
 
         flockfile(db_file);
 
-        fprintf(db_file, "nome: %s\n", profile->nome);
-        fprintf(db_file, "sobrenome: %s\n", profile->sobrenome);
-        fprintf(db_file, "residencia: %s\n", profile->residencia);
-        fprintf(db_file, "formacao: %s\n", profile->formacao);
-        fprintf(db_file, "ano_formatura: %s\n", profile->ano_formatura);
-        fprintf(db_file, "habilidades: %s\n", profile->habilidades);
-        fprintf(db_file, "experiencias:\n");
+        fprintf(db_file, "%s\n", profile->nome);
+        fprintf(db_file, "%s\n", profile->sobrenome);
+        fprintf(db_file, "%s\n", profile->residencia);
+        fprintf(db_file, "%s\n", profile->formacao);
+        fprintf(db_file, "%s\n", profile->ano_formatura);
+        fprintf(db_file, "%s\n", profile->habilidades);
         for (int32_t i = 0; i < profile->n_experiencia; i++)
         {
             fprintf(db_file, "%s\n", profile->experiencia[i]);

@@ -1,6 +1,7 @@
 #include "utils.h"
 
 #include <stdio.h>
+#include <string.h>
 
 AccountType login(void)
 {
@@ -10,6 +11,16 @@ AccountType login(void)
     // select account type based on user input
     // Q: should the user be already registered to be able to access? 
     //    (request the server for the user or allow anything?)
+
+    char acc_type[6];
+
+    puts("Por favor, insira o tipo de usuario. Opcoes: (admin, user):\n");
+    do{
+        scanf("%s", acc_type);
+    } while(strcmp(acc_type,"user") != 0 || strcmp(acc_type,"admin") != 0);
+  
+    if(strcmp(acc_type,"user") == 0)
+        return USER;
 
     return ADMIN;
 }

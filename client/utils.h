@@ -1,4 +1,5 @@
 #pragma once
+#include "comm.h"
 
 typedef enum _AccountType
 {

@@ -49,7 +49,7 @@ UserProfile *client_connect(ProtocolData comando, UserProfile prof_buf, int *n_p
 
 	if ((rv = getaddrinfo(NULL, PORT, &hints, &servinfo)) != 0) { // Alterar NULL caso necessario
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
-		return 1;
+		return NULL;
 	}
 
 	// loop through all the results and connect to the first we can
@@ -71,7 +71,7 @@ UserProfile *client_connect(ProtocolData comando, UserProfile prof_buf, int *n_p
 
 	if (p == NULL) {
 		fprintf(stderr, "client: failed to connect\n");
-		return 2;
+		return NULL;
 	}
 
 	inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr),
@@ -81,23 +81,18 @@ UserProfile *client_connect(ProtocolData comando, UserProfile prof_buf, int *n_p
 	freeaddrinfo(servinfo); // all done with this structure
 
 	// Envio de comandos
-	//buf = (void*) ProtocolData + UserProfile;
-	memcpy(buf, &comando, sizeof(ProtocolData));
-	memcpy(buf+sizeof(ProtocolData), &prof_buf, sizeof(UserProfile));
 
-	if (send(sockfd, buf, sizeof(ProtocolData), 0) == -1)
-                perror("send"); // Definir socket, mensagem, tamanho
+	int protocol_bytes = sizeof(ProtocolData);
+	int profile_bytes = sizeof(UserProfile);
+	memcpy(buf, &comando, protocol_bytes);
+	memcpy(buf+protocol_bytes, &prof_buf, profile_bytes);
 
-	// Se nao for READ, pode encerrar a conexao
-	if (comando.op != READ)
-	{
-		close(sockfd);
-		return NULL;
-	}
+	if (send(sockfd, buf, protocol_bytes, 0) == -1) // Adicionar tamanho do UserProfile?
+                perror("send"); 
 
 	// Recebimento da resposta inicial (ProtocolData)
 
-	if ((numbytes = recv(sockfd, buf, sizeof(ProtocolData), 0)) == -1) {
+	if ((numbytes = recv(sockfd, buf, protocol_bytes, 0)) == -1) {
 	    perror("recv");
 	    exit(1);
 	}
@@ -108,22 +103,31 @@ UserProfile *client_connect(ProtocolData comando, UserProfile prof_buf, int *n_p
 	ProtocolData resposta;
 	UserProfile *profile_list;
 
-	// Capturando protocol data resposta, para saber quantos profiles vao chegar
-	memcpy(&resposta, buf, sizeof(ProtocolData));
+	// Capturando protocol data resposta
+	memcpy(&resposta, buf, protocol_bytes);
 
-	profile_list = (UserProfile*)malloc(sizeof(UserProfile) * resposta.profiles_num); // Alocar a lista
+	// Se nao for READ, capturar se houve sucesso ou erro na operacao, e encerrar
+	if (comando.op != READ)
+	{
+		*n_profiles = resposta.op; // ERROR ou SUCCES neste caso
+		close(sockfd);
+		return NULL;
+	}
+
+	// Sabemos quantos profiles vao chegar atraves de resposta.profiles_num
+	profile_list = (UserProfile*)malloc(profile_bytes * resposta.profiles_num); // Alocar a lista
 	*n_profiles = resposta.profiles_num;
 
 	// Receber N Profiles
 	for (size_t i = 0; i < resposta.profiles_num; i++)
 	{
-		if ((numbytes = recv(sockfd, buf, sizeof(UserProfile), 0)) == -1) {
+		if ((numbytes = recv(sockfd, buf, profile_bytes, 0)) == -1) {
 	    	perror("recv");
 	    	exit(1);
 		}
 
 		// Transferir para a lista
-		memcpy(profile_list + (i * sizeof(UserProfile)), buf, sizeof(UserProfile));
+		memcpy(profile_list + (i * profile_bytes), buf, profile_bytes);
 	}
 
 	close(sockfd);

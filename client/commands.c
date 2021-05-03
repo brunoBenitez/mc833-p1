@@ -14,6 +14,7 @@ void addExperience(void)
     // 2) send update to server database
     UserProfile input;
     ProtocolData comando;
+    int *n_profiles = malloc(sizeof(int));
 
     comando.op = UPDATE;
     comando.profiles_num = 1;
@@ -21,7 +22,14 @@ void addExperience(void)
     puts("Voce escolheu *ADICIONAR EXPERIENCIA*. Por favor, forneca um email seguido de apenas uma experiencia\n");
     scanf("%s", input.email);
     scanf("%s", input.experiencia[0]);
-    client_connect(comando, input, 0); // Alterar o ponteiro para int de forma adequada
+    client_connect(comando, input, n_profiles);
+
+    if (*n_profiles == SUCCESS) 
+    {
+        puts("Sucesso!\n");
+    } else{
+        puts("Falha!\n");
+    }
 }
 
 void listPeopleByMajor(void)
@@ -232,7 +240,7 @@ void deleteProfile(void)
     comando.op = DELETE;
     client_connect(comando, input, n_profiles);
 
-    if (1) // adicionar codigo de erro aqui
+    if (*n_profiles == SUCCESS) 
     {
         puts("Sucesso!\n");
     } else{
@@ -283,7 +291,7 @@ void registerProfile(void)
     comando.op = CREATE;
     client_connect(comando, input, n_profiles);
 
-    if (1) // adicionar codigo de erro aqui
+    if (*n_profiles == SUCCESS) 
     {
         puts("Sucesso!\n");
     } else{

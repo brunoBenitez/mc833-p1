@@ -7,11 +7,10 @@
 
 void addExperience(void)
 {
-    // TODO:
-    // 1) get input:
-    //      - email (string?)
-    //      - experience (string?)
-    // 2) send update to server database
+    // - get input:
+    //      - email
+    //      - experience
+    // - send update to server database
     UserProfile input;
     ProtocolData comando;
     int n_profiles;
@@ -34,12 +33,10 @@ void addExperience(void)
 
 void listPeopleByMajor(void)
 {
-    // TODO:
-    // 1) get input: major (string?)
-    // 2.0) queue server database for profiles with the major.
-    // 2.1) queue server for database
-    // 2.1.1) filter database by major
-    // 3) show profiles found with Email and Name
+    // - get input: major (string?)
+    // - queue server for database
+    // - filter database by major
+    // - show profiles found with Email and Name
     UserProfile input;
     ProtocolData comando;
     UserProfile *output;
@@ -65,12 +62,10 @@ void listPeopleByMajor(void)
 
 void listPeopleBySkill(void)
 {
-    // TODO:
-    // 1) get input: skill (string?)
-    // 2.0) queue server database for profiles with the skill.
-    // 2.1) queue server for database
-    // 2.1.1) filter database by skill
-    // 3) show profiles found with Email and Name
+    // - get input: skill
+    // - queue server for database
+    // - filter database by skill
+    // - show profiles found with Email and Name
     UserProfile input;
     ProtocolData comando;
     UserProfile *output;
@@ -96,12 +91,10 @@ void listPeopleBySkill(void)
 
 void listPeopleByGradYear(void)
 {
-    // TODO:
-    // 1) get input: major (string?)
-    // 2.0) queue server database for profiles with the major.
-    // 2.1) queue server for database
-    // 2.1.1) filter database by major
-    // 3) show profiles found with Email, Name and Major
+    // - get input: major
+    // - queue server for database
+    // - filter database by major
+    // - show profiles found with Email, Name and Major
     UserProfile input;
     ProtocolData comando;
     UserProfile *output;
@@ -128,9 +121,8 @@ void listPeopleByGradYear(void)
 
 void listAll(void)
 {
-    // TODO:
-    // 1) queue server for whole database.
-    // 2) show profiles with all info
+    // - queue server for whole database.
+    // - show profiles with all info
     // 
     // example:
     //
@@ -176,12 +168,10 @@ void listAll(void)
 
 void retrieveProfileInfo(void)
 {
-    // TODO:
-    // 1) get input: email (string?)
-    // 2.0) queue server database for profile with email.
-    // 2.1) queue server for database
-    // 2.1.1) find specified email in data
-    // 3) show profile with all info
+    // - get input: email (string?)
+    // - queue server for database
+    // - find specified email in data
+    // - show profile with all info
     //
     // example:
     //
@@ -227,12 +217,10 @@ void retrieveProfileInfo(void)
 
 void deleteProfile(void)
 {
-    // TODO:
-    // 1) get input: email (string?)
-    // 2) send deletion request to server
+    // - get input: email (string?)
+    // - send deletion request to server
     UserProfile input;
     ProtocolData comando;
-    //UserProfile *output;
     int n_profiles;
 
     puts("Voce escolheu *EXCLUIR PERFIL*. Por favor, forneca um email\n");
@@ -250,19 +238,18 @@ void deleteProfile(void)
 
 void registerProfile(void)
 {
-    // TODO:
-    // 1) get input:
+    // - get input:
     //      - email (string)
     //      - nome (string)
     //      - sobrenome (string)
     //      - residência (string)
     //      - formação academica (string)
-    //      - ano de formatura (int?string?)
-    //      - habilidades
-    //      - experiência
+    //      - ano de formatura (int)
+    //      - habilidades (string)
+    //      - experiência (int+string)
+    // 2) send to server
     UserProfile input;
     ProtocolData comando;
-    //UserProfile *output;
     int n_profiles; // Variavel coringa para n de profiles retornados. pode ser usada para erro?
 
     puts("Voce escolheu *ADICIONAR NOVO PERFIL*. Por favor, forneca os dados conforme requisitado:\n");

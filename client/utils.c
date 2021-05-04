@@ -17,7 +17,7 @@ AccountType login(void)
     puts("Por favor, insira o tipo de usuario. Opcoes: (admin, user):\n");
     do{
         scanf("%s", acc_type);
-    } while(strcmp(acc_type,"user") != 0 || strcmp(acc_type,"admin") != 0);
+    } while(strcmp(acc_type,"user") != 0 && strcmp(acc_type,"admin") != 0);
   
     if(strcmp(acc_type,"user") == 0)
         return USER;

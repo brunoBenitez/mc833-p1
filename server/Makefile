@@ -1,5 +1,5 @@
 CC = gcc
-CC_FLAGS = -std=gnu11 -pedantic -Wall -I..
+CC_FLAGS = -std=gnu11 -ggdb -pedantic -Wall -I..
 
 all: server.x
 .PHONY: all

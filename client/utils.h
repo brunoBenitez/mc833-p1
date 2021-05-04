@@ -1,11 +1,15 @@
 #pragma once
 #include "comm.h"
 
+#include <stdio.h>
+
 typedef enum _AccountType
 {
     ADMIN,
     USER
 } AccountType;
+
+char *fgetss(char *dest, int n, FILE *stream);
 
 // show an option menu with choice by number and returns a char with the user input
 int showMenu(AccountType accountType);

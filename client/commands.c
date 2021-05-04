@@ -4,6 +4,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
+
+static void get_uint(uint32_t *dest)
+{
+    char input[8];
+    fgets(input, 8, stdin);
+    sscanf(input, "%u", dest);
+}
 
 void addExperience(void)
 {
@@ -18,16 +26,16 @@ void addExperience(void)
     comando.op = UPDATE;
     comando.profiles_num = 1;
 
-    puts("Voce escolheu *ADICIONAR EXPERIENCIA*. Por favor, forneca um email seguido de apenas uma experiencia\n");
+    printf("Voce escolheu *ADICIONAR EXPERIENCIA*. Por favor, forneca um email seguido de apenas uma experiencia\n\n");
     scanf("%s", input.email);
     scanf("%s", input.experiencia[0]);
     client_connect(comando, input, &n_profiles);
 
     if (n_profiles == SUCCESS) 
     {
-        puts("Sucesso!\n");
+        printf("Sucesso!\n\n");
     } else{
-        puts("Falha!\n");
+        printf("Falha!\n\n");
     }
 }
 
@@ -43,7 +51,7 @@ void listPeopleByMajor(void)
     int count = 0;
     int n_profiles;
 
-    puts("Voce escolheu *LISTAR POR FORMACAO*. Por favor, forneca uma formacao\n");
+    printf("Voce escolheu *LISTAR POR FORMACAO*. Por favor, forneca uma formacao\n\n");
     comando.op = READ;
     scanf("%s", input.formacao);
     output = client_connect(comando, input, &n_profiles);
@@ -72,7 +80,7 @@ void listPeopleBySkill(void)
     int count = 0;
     int n_profiles;
 
-    puts("Voce escolheu *LISTAR POR HABILIDADE*. Por favor, forneca uma habilidade\n");
+    printf("Voce escolheu *LISTAR POR HABILIDADE*. Por favor, forneca uma habilidade\n\n");
     comando.op = READ;
     scanf("%s", input.habilidades);
     output = client_connect(comando, input, &n_profiles);
@@ -101,7 +109,7 @@ void listPeopleByGradYear(void)
     int count = 0;
     int n_profiles;
 
-    puts("Voce escolheu *LISTAR POR ANO DE FORMATURA*. Por favor, forneca um ano\n");
+    printf("Voce escolheu *LISTAR POR ANO DE FORMATURA*. Por favor, forneca um ano\n\n");
     comando.op = READ;
     scanf("%u", &input.ano_formatura);
     output = client_connect(comando, input, &n_profiles);
@@ -141,7 +149,7 @@ void listAll(void)
     int count = 0;
     int n_profiles;
 
-    puts("Voce escolheu *LISTAR TODOS PERFIS*\n");
+    printf("Voce escolheu *LISTAR TODOS PERFIS*\n\n");
     comando.op = READ;
     output = client_connect(comando, input, &n_profiles);
 
@@ -159,7 +167,7 @@ void listAll(void)
                 printf("(%d) %s\n", j+1, output[i].experiencia[j]);
             }
         } else{
-            printf("Nenhuma!\n");
+            printf("Nenhuma!\n\n");
         }
     }
     
@@ -189,7 +197,7 @@ void retrieveProfileInfo(void)
     UserProfile *output;
     int n_profiles;
 
-    puts("Voce escolheu *LISTAR TODOS PERFIS*\n");
+    printf("Voce escolheu *LISTAR TODOS PERFIS*\n\n");
     comando.op = READ;
     output = client_connect(comando, input, &n_profiles);
 
@@ -208,7 +216,7 @@ void retrieveProfileInfo(void)
                     printf("(%d) %s\n", j+1, output[i].experiencia[j]);
                 }
             } else{
-                printf("Nenhuma!\n");
+                printf("Nenhuma!\n\n");
             }
         }
         break;
@@ -223,16 +231,16 @@ void deleteProfile(void)
     ProtocolData comando;
     int n_profiles;
 
-    puts("Voce escolheu *EXCLUIR PERFIL*. Por favor, forneca um email\n");
+    printf("Voce escolheu *EXCLUIR PERFIL*. Por favor, forneca um email\n\n");
     scanf("%s", input.email);
     comando.op = DELETE;
     client_connect(comando, input, &n_profiles);
 
     if (n_profiles == SUCCESS) 
     {
-        puts("Sucesso!\n");
+        printf("Sucesso!\n\n");
     } else{
-        puts("Falha!\n");
+        printf("Falha!\n\n");
     }
 }
 
@@ -252,27 +260,28 @@ void registerProfile(void)
     ProtocolData comando;
     int n_profiles; // Variavel coringa para n de profiles retornados. pode ser usada para erro?
 
-    puts("Voce escolheu *ADICIONAR NOVO PERFIL*. Por favor, forneca os dados conforme requisitado:\n");
-    puts("Email:\n");
-    scanf("%s", input.email);
-    puts("Nome:\n");
-    scanf("%s", input.nome);
-    puts("Sobrenome:\n");
-    scanf("%s", input.sobrenome);
-    puts("Residencia:\n");
-    scanf("%s", input.residencia);
-    puts("Formacao Academica:\n");
-    scanf("%s", input.formacao);
-    puts("Ano de formatura:\n");
-    scanf("%u", &input.ano_formatura);
-    puts("Habilidades:\n");
-    scanf("%s", input.habilidades);
-    puts("Quantas experiencias quer inserir? (0-20):\n");
-    scanf("%u", &input.n_experiencia);
+    printf("Voce escolheu *ADICIONAR NOVO PERFIL*. Por favor, forneca os dados conforme requisitado:\n");
+    printf("Email:\n");
+    fgetss(input.email, MAX_CHARS, stdin);
+    printf("Nome:\n");
+    fgetss(input.nome, MAX_CHARS, stdin);
+    printf("Sobrenome:\n");
+    fgetss(input.sobrenome, MAX_CHARS, stdin);
+    printf("Residencia:\n");
+    fgetss(input.residencia, MAX_CHARS, stdin);
+    printf("Formacao Academica:\n");
+    fgetss(input.formacao, MAX_CHARS, stdin);
+    printf("Ano de formatura:\n");
+    get_uint(&input.ano_formatura);
+    printf("Habilidades:\n");
+    fgetss(input.habilidades, MAX_CHARS, stdin);
+    printf("Quantas experiencias quer inserir? (0-20):\n");
+    get_uint(&input.n_experiencia);
+    input.n_experiencia = input.n_experiencia < MAX_EXP ? input.n_experiencia : MAX_EXP;
     for (int i = 0; i < input.n_experiencia; i++)
     {
-        printf("Insira experiencia #%d:\n", i+1);
-        scanf("%s", input.experiencia[i]);
+        printf("Insira experiencia #%d:", i+1);
+        fgetss(input.experiencia[i], MAX_CHARS, stdin);
     }
     
     comando.op = CREATE;
@@ -280,8 +289,8 @@ void registerProfile(void)
 
     if (n_profiles == SUCCESS) 
     {
-        puts("Sucesso!\n");
+        printf("Sucesso!\n");
     } else{
-        puts("Falha!\n");
+        printf("Falha!\n");
     }
 }

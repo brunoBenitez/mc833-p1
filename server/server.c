@@ -58,6 +58,7 @@ void handle_request(int sock_fd)
     profile_buf = (UserProfile *)(recv_buffer + sizeof(ProtocolData));
 
     // Should all cases send response?
+    printf("Received operation: %u", ntohl(req_data->op));
     switch (ntohl(req_data->op))
     {
     case CREATE:
@@ -87,8 +88,7 @@ void handle_request(int sock_fd)
         break;
 
     default:
-        perror("Operação inválida recebida\n");
-        exit(1);
+        fprintf(stderr, "Operação inválida recebida: %u", ntohl(req_data->op));
         break;
     }
 }

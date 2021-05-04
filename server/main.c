@@ -14,6 +14,7 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 #include <signal.h>
 
 #include "server.h"
@@ -54,6 +55,31 @@ int main(void)
     int yes = 1;
     char s[INET6_ADDRSTRLEN];
     int rv;
+
+    // https://www.delftstack.com/howto/c/mkdir-in-c/
+    int ret = mkdir("data", S_IRWXU);
+    if (ret == -1)
+    {
+        switch (errno)
+        {
+        case EACCES:
+            printf("the parent directory does not allow write");
+            exit(EXIT_FAILURE);
+        case EEXIST:
+            break;
+        case ENAMETOOLONG:
+            printf("pathname is too long");
+            exit(EXIT_FAILURE);
+        default:
+            perror("mkdir");
+            exit(EXIT_FAILURE);
+        }
+    }
+    else
+    {
+        printf("\'data\' directory created to store database\n");
+    }
+    
 
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
@@ -142,9 +168,6 @@ int main(void)
             // the server only handles one request per connection.
             // if the user wants to make more requests it should initiate other connections.
             handle_request(new_fd);
-
-            if (send(new_fd, "Hello, world!", 13, 0) == -1)
-                perror("send");
 
             close(new_fd);
             exit(0);

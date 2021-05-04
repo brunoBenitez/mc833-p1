@@ -18,7 +18,7 @@
 
 #define PORT "3490" // the port client will be connecting to 
 
-#define MAXDATASIZE 100 // max number of bytes we can get at once 
+#define MAXDATASIZE 4098 // max number of bytes we can get at once 
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
@@ -83,11 +83,17 @@ UserProfile *client_connect(ProtocolData comando, UserProfile prof_buf, int *n_p
 	// Envio de comandos
 
 	int protocol_bytes = sizeof(ProtocolData);
+	ProtocolData data;
+	data.op = htonl(comando.op);
+	data.profiles_num = htonl(comando.profiles_num);
+	memcpy(buf, &data, protocol_bytes);
+
 	int profile_bytes = sizeof(UserProfile);
-	memcpy(buf, &comando, protocol_bytes);
+	prof_buf.ano_formatura = htonl(prof_buf.ano_formatura);
+	prof_buf.n_experiencia = htonl(prof_buf.n_experiencia);
 	memcpy(buf+protocol_bytes, &prof_buf, profile_bytes);
 
-	if (send(sockfd, buf, protocol_bytes, 0) == -1) // Adicionar tamanho do UserProfile?
+	if (send(sockfd, buf, protocol_bytes + profile_bytes, 0) == -1) // Adicionar tamanho do UserProfile?
 		perror("send");
 
 	// Recebimento da resposta inicial (ProtocolData)
@@ -105,9 +111,11 @@ UserProfile *client_connect(ProtocolData comando, UserProfile prof_buf, int *n_p
 
 	// Capturando protocol data resposta
 	memcpy(&resposta, buf, protocol_bytes);
-
+	resposta.op = ntohl(resposta.op);
+	resposta.profiles_num = ntohl(resposta.profiles_num);
+	
 	// Se nao for READ, capturar se houve sucesso ou erro na operacao, e encerrar
-	if (comando.op != READ)
+	if (comando.op != READ || resposta.op == ERROR)
 	{
 		*n_profiles = resposta.op; // ERROR ou SUCCES neste caso
 		close(sockfd);
@@ -127,7 +135,9 @@ UserProfile *client_connect(ProtocolData comando, UserProfile prof_buf, int *n_p
 		}
 
 		// Transferir para a lista
-		memcpy(profile_list + (i * profile_bytes), buf, profile_bytes);
+		memcpy(&(profile_list[i]), buf, profile_bytes);
+		profile_list[i].ano_formatura = ntohl(profile_list[i].ano_formatura);
+		profile_list[i].n_experiencia = ntohl(profile_list[i].n_experiencia);
 	}
 
 	close(sockfd);

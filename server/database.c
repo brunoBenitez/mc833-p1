@@ -33,6 +33,9 @@ static size_t get_dir_filenames(char *dirname, char ***namelist)
         // read ./data directory and store entries names on filename_list.
         while ((dir_entry = readdir(data_dir)) != NULL)
         {
+            if (dir_entry->d_name[0] == '.')
+                continue;
+
             if (n_files >= cap)
             {
                 size_t new_size = cap * 2;
@@ -62,7 +65,27 @@ static void get_email_from_filename(char *dest, char *filename)
     assert(filename);
 
     char *last_point = strrchr(filename, '.');
-    strncpy(dest, filename, last_point - filename);
+    strcpy(dest, filename);
+    dest[last_point - filename] = '\0';
+}
+
+static void fget_uint(FILE *in, uint32_t *dest)
+{
+    char input[8];
+    fgets(input, 8, in);
+    sscanf(input, "%u", dest);
+}
+
+static char *fgetss(char *dest, int n, FILE *stream)
+{
+    if (fgets(dest, n, stream))
+    {
+        int len = strlen(dest);
+        if (dest[len - 1] == '\n')
+            dest[len - 1] = '\0';
+        return dest;
+    }
+    return NULL;
 }
 
 // creates an entry for profile in database
@@ -79,21 +102,28 @@ int create_user(UserProfile *profile)
     if (profile)
     {
         GET_FILENAME(filename, profile->email);
-        strcat(filename, profile->email);
         db_file = fopen(filename, "w");
 
-        fprintf(db_file, "%s\n", profile->nome);
-        fprintf(db_file, "%s\n", profile->sobrenome);
-        fprintf(db_file, "%s\n", profile->residencia);
-        fprintf(db_file, "%s\n", profile->formacao);
-        fprintf(db_file, "%u\n", ntohl(profile->ano_formatura));
-        fprintf(db_file, "%s\n", profile->habilidades);
-        for (int32_t i = 0; i < ntohl(profile->n_experiencia); i++)
+        if (db_file)
         {
-            fprintf(db_file, "%s\n", profile->experiencia[i]);
-        }
+            fprintf(db_file, "%s\n", profile->nome);
+            fprintf(db_file, "%s\n", profile->sobrenome);
+            fprintf(db_file, "%s\n", profile->residencia);
+            fprintf(db_file, "%s\n", profile->formacao);
+            fprintf(db_file, "%u\n", ntohl(profile->ano_formatura));
+            fprintf(db_file, "%s\n", profile->habilidades);
+            for (int32_t i = 0; i < ntohl(profile->n_experiencia); i++)
+            {
+                fprintf(db_file, "%s\n", profile->experiencia[i]);
+            }
 
-        fclose(db_file);
+            fclose(db_file);
+        }
+        else
+        {
+            success = 0;
+            fprintf(stderr, "failed to create file at: create_user\n");
+        }
     }
     else
     {
@@ -132,18 +162,18 @@ int read_db(UserProfile **profile)
             {
                 get_email_from_filename(users[u_idx].email, filenames[i]);
 
-                fgets(users[u_idx].nome, sizeof users[u_idx].nome, current_file);
-                fgets(users[u_idx].sobrenome, sizeof users[u_idx].sobrenome, current_file);
-                fgets(users[u_idx].residencia, sizeof users[u_idx].residencia, current_file);
-                
+                fgetss(users[u_idx].nome, sizeof users[u_idx].nome, current_file);
+                fgetss(users[u_idx].sobrenome, sizeof users[u_idx].sobrenome, current_file);
+                fgetss(users[u_idx].residencia, sizeof users[u_idx].residencia, current_file);
+
                 // get uint32_t from file
-                fscanf(current_file, "%u", &(users[u_idx].ano_formatura));
+                fget_uint(current_file, &(users[u_idx].ano_formatura));
                 users[u_idx].ano_formatura = htonl(users[u_idx].ano_formatura);
 
-                fgets(users[u_idx].habilidades, sizeof users[u_idx].habilidades, current_file);
+                fgetss(users[u_idx].habilidades, sizeof users[u_idx].habilidades, current_file);
 
                 // get the subsequent line as work experience
-                for (n_exp = 0; fgets(users[u_idx].experiencia[n_exp], MAX_CHARS, current_file) && n_exp < MAX_EXP; n_exp++);
+                for (n_exp = 0; fgetss(users[u_idx].experiencia[n_exp], MAX_CHARS, current_file) && n_exp < MAX_EXP; n_exp++);
                 users[u_idx].n_experiencia = htonl(n_exp);
 
                 fclose(current_file);

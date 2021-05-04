@@ -14,7 +14,7 @@ void addExperience(void)
     // 2) send update to server database
     UserProfile input;
     ProtocolData comando;
-    int *n_profiles = malloc(sizeof(int));
+    int n_profiles;
 
     comando.op = UPDATE;
     comando.profiles_num = 1;
@@ -22,9 +22,9 @@ void addExperience(void)
     puts("Voce escolheu *ADICIONAR EXPERIENCIA*. Por favor, forneca um email seguido de apenas uma experiencia\n");
     scanf("%s", input.email);
     scanf("%s", input.experiencia[0]);
-    client_connect(comando, input, n_profiles);
+    client_connect(comando, input, &n_profiles);
 
-    if (*n_profiles == SUCCESS) 
+    if (n_profiles == SUCCESS) 
     {
         puts("Sucesso!\n");
     } else{
@@ -44,14 +44,14 @@ void listPeopleByMajor(void)
     ProtocolData comando;
     UserProfile *output;
     int count = 0;
-    int *n_profiles = malloc(sizeof(int));
+    int n_profiles;
 
     puts("Voce escolheu *LISTAR POR FORMACAO*. Por favor, forneca uma formacao\n");
     comando.op = READ;
     scanf("%s", input.formacao);
-    output = client_connect(comando, input, n_profiles);
+    output = client_connect(comando, input, &n_profiles);
 
-    for (int i = 0; i < *n_profiles; i++)
+    for (int i = 0; i < n_profiles; i++)
     {
         if (strcmp(output[i].formacao, input.formacao) == 0)
         {
@@ -75,14 +75,14 @@ void listPeopleBySkill(void)
     ProtocolData comando;
     UserProfile *output;
     int count = 0;
-    int *n_profiles = malloc(sizeof(int));
+    int n_profiles;
 
     puts("Voce escolheu *LISTAR POR HABILIDADE*. Por favor, forneca uma habilidade\n");
     comando.op = READ;
     scanf("%s", input.habilidades);
-    output = client_connect(comando, input, n_profiles);
+    output = client_connect(comando, input, &n_profiles);
 
-    for (int i = 0; i < *n_profiles; i++)
+    for (int i = 0; i < n_profiles; i++)
     {
         if (strstr(output[i].habilidades, input.habilidades) != NULL) // Procura substring
         {
@@ -106,14 +106,14 @@ void listPeopleByGradYear(void)
     ProtocolData comando;
     UserProfile *output;
     int count = 0;
-    int *n_profiles = malloc(sizeof(int));
+    int n_profiles;
 
     puts("Voce escolheu *LISTAR POR ANO DE FORMATURA*. Por favor, forneca um ano\n");
     comando.op = READ;
     scanf("%u", &input.ano_formatura);
-    output = client_connect(comando, input, n_profiles);
+    output = client_connect(comando, input, &n_profiles);
 
-    for (int i = 0; i < *n_profiles; i++)
+    for (int i = 0; i < n_profiles; i++)
     {
         if (output[i].ano_formatura == input.ano_formatura) 
         {
@@ -147,13 +147,13 @@ void listAll(void)
     ProtocolData comando;
     UserProfile *output;
     int count = 0;
-    int *n_profiles = malloc(sizeof(int));
+    int n_profiles;
 
     puts("Voce escolheu *LISTAR TODOS PERFIS*\n");
     comando.op = READ;
-    output = client_connect(comando, input, n_profiles);
+    output = client_connect(comando, input, &n_profiles);
 
-    for (int i = 0; i < *n_profiles; i++)
+    for (int i = 0; i < n_profiles; i++)
     {
         printf("*****\nEmail: %s\nNome: %s\nSobrenome: %s\nResidencia: %s\nFormacao: %s\n\
         Ano de formatura: %d\nHabilidades: %s\nExperiências: ",
@@ -197,13 +197,13 @@ void retrieveProfileInfo(void)
     UserProfile input;
     ProtocolData comando;
     UserProfile *output;
-    int *n_profiles = malloc(sizeof(int));
+    int n_profiles;
 
     puts("Voce escolheu *LISTAR TODOS PERFIS*\n");
     comando.op = READ;
-    output = client_connect(comando, input, n_profiles);
+    output = client_connect(comando, input, &n_profiles);
 
-    for (int i = 0; i < *n_profiles; i++)
+    for (int i = 0; i < n_profiles; i++)
     {
         if (strcmp(input.email, output[i].email) == 0) 
         {
@@ -233,14 +233,14 @@ void deleteProfile(void)
     UserProfile input;
     ProtocolData comando;
     //UserProfile *output;
-    int *n_profiles = malloc(sizeof(int));
+    int n_profiles;
 
     puts("Voce escolheu *EXCLUIR PERFIL*. Por favor, forneca um email\n");
     scanf("%s", input.email);
     comando.op = DELETE;
-    client_connect(comando, input, n_profiles);
+    client_connect(comando, input, &n_profiles);
 
-    if (*n_profiles == SUCCESS) 
+    if (n_profiles == SUCCESS) 
     {
         puts("Sucesso!\n");
     } else{
@@ -263,7 +263,7 @@ void registerProfile(void)
     UserProfile input;
     ProtocolData comando;
     //UserProfile *output;
-    int *n_profiles = malloc(sizeof(int)); // Variavel coringa para n de profiles retornados. pode ser usada para erro?
+    int n_profiles; // Variavel coringa para n de profiles retornados. pode ser usada para erro?
 
     puts("Voce escolheu *ADICIONAR NOVO PERFIL*. Por favor, forneca os dados conforme requisitado:\n");
     puts("Email:\n");
@@ -289,9 +289,9 @@ void registerProfile(void)
     }
     
     comando.op = CREATE;
-    client_connect(comando, input, n_profiles);
+    client_connect(comando, input, &n_profiles);
 
-    if (*n_profiles == SUCCESS) 
+    if (n_profiles == SUCCESS) 
     {
         puts("Sucesso!\n");
     } else{

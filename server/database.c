@@ -251,13 +251,13 @@ int delete_user(UserProfile *profile)
         if (remove(filename) != 0)
         {
             success = 0;
-            fprintf(stderr, "failed to remove file for %s", profile->email);
+            fprintf(stderr, "failed to remove file for %s\n", profile->email);
         }
     }
     else
     {
         success = 0;
-        fprintf(stderr, "invalid profile received at: delete_user");
+        fprintf(stderr, "invalid profile received at: delete_user\n");
     }
     return success;
 }

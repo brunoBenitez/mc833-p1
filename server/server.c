@@ -12,17 +12,37 @@
 static void send_success(int sock_fd)
 {
     ProtocolData data;
+    size_t rv, sent_size = 0;
     data.op = htonl(SUCCESS);
     data.profiles_num = 0;
-    send(sock_fd, &data, sizeof(ProtocolData), 0);
+    do {
+        rv = send(sock_fd, &data + sent_size, sizeof(ProtocolData) - sent_size, 0);
+        if (rv == -1) {
+            perror("send_success");
+            return;
+        } else {
+            sent_size += rv;
+        }
+    } while (sent_size < sizeof(ProtocolData));
+    printf("SUCCESS sent\n");
 }
 
 static void send_error(int sock_fd)
 {
     ProtocolData data;
+    size_t rv, sent_size = 0;
     data.op = htonl(ERROR);
     data.profiles_num = 0;
-    send(sock_fd, &data, sizeof(ProtocolData), 0);
+    do {
+        rv = send(sock_fd, &data + sent_size, sizeof(ProtocolData) - sent_size, 0);
+        if (rv == -1) {
+            perror("send_error");
+            return;
+        } else {
+            sent_size += rv;
+        }
+    } while (sent_size < sizeof(ProtocolData));
+    printf("ERROR sent\n");
 }
 
 static void send_profiles(int sock_fd, UserProfile *profs, int n_profs)
@@ -36,15 +56,26 @@ static void send_profiles(int sock_fd, UserProfile *profs, int n_profs)
     memcpy(send_buf, &data, sizeof(ProtocolData));
     memcpy(send_buf + sizeof(ProtocolData), profs, n_profs * sizeof(UserProfile));
 
-    if (send(sock_fd, send_buf, send_size, 0) != send_size)
-    {
-        perror("buffers not sent completely");
-    }
+    size_t rv, sent_size = 0;
+    do {
+        rv = send(sock_fd, send_buf + sent_size, send_size - sent_size, 0);
+        if (rv == -1) {
+            perror("send_profiles");
+            break;
+        } else {
+            sent_size += rv;
+        }
+    } while (sent_size < send_size);
+
+    if (sent_size == send_size)
+        printf("%u profiles sent successfully!\n", n_profs);
+
+    free(send_buf);
 }
 
 void handle_request(int sock_fd)
 {
-    size_t recv_size;
+    size_t recv_size, recvd_size, rv;
     int n_profs;
     uint8_t *recv_buffer;
     ProtocolData *req_data;
@@ -52,7 +83,16 @@ void handle_request(int sock_fd)
 
     recv_size = sizeof(ProtocolData) + sizeof(UserProfile);
     recv_buffer = malloc(recv_size);
-    recv(sock_fd, recv_buffer, recv_size, 0);
+    recvd_size = 0;
+    do {
+        rv = recv(sock_fd, recv_buffer + recvd_size, recv_size - recvd_size, 0);
+        if (rv == -1) {
+            perror("recv");
+            return;
+        } else {
+            recvd_size += rv;
+        }
+    } while (recvd_size < recv_size);
 
     req_data = (ProtocolData *)recv_buffer;
     profile_buf = (UserProfile *)(recv_buffer + sizeof(ProtocolData));
@@ -88,7 +128,7 @@ void handle_request(int sock_fd)
         break;
 
     default:
-        fprintf(stderr, "Operação inválida recebida: %u", ntohl(req_data->op));
+        fprintf(stderr, "Operação inválida recebida: %u\n", ntohl(req_data->op));
         break;
     }
 }

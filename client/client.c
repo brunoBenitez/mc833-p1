@@ -46,8 +46,8 @@ UserProfile *client_connect(ProtocolData comando, UserProfile prof_buf, int *n_p
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
-
-	if ((rv = getaddrinfo(NULL, PORT, &hints, &servinfo)) != 0) { // Alterar NULL caso necessario
+	hints.ai_flags = AI_NUMERICHOST;
+	if ((rv = getaddrinfo("177.76.153.100", PORT, &hints, &servinfo)) != 0) { // Alterar NULL caso necessario
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
 		return NULL;
 	}
@@ -93,7 +93,7 @@ UserProfile *client_connect(ProtocolData comando, UserProfile prof_buf, int *n_p
 	prof_buf.n_experiencia = htonl(prof_buf.n_experiencia);
 	memcpy(buf+protocol_bytes, &prof_buf, profile_bytes);
 
-	if (send(sockfd, buf, protocol_bytes + profile_bytes, 0) == -1) // Adicionar tamanho do UserProfile?
+	if (send(sockfd, buf, protocol_bytes + profile_bytes, 0) == -1)
 		perror("send");
 
 	// Recebimento da resposta inicial (ProtocolData)

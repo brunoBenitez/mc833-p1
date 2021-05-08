@@ -6,11 +6,11 @@
 #include <string.h>
 #include <stdint.h>
 
-static void get_uint(uint32_t *dest)
+static int get_uint(uint32_t *dest)
 {
-    char input[8];
-    fgets(input, 8, stdin);
-    sscanf(input, "%u", dest);
+    char input[32];
+    fgets(input, 32, stdin);
+    return sscanf(input, "%u", dest);
 }
 
 void addExperience(void)
@@ -27,8 +27,8 @@ void addExperience(void)
     comando.profiles_num = 1;
 
     printf("Voce escolheu *ADICIONAR EXPERIENCIA*. Por favor, forneca um email seguido de apenas uma experiencia\n\n");
-    scanf("%s", input.email);
-    scanf("%s", input.experiencia[0]);
+    fgetss(input.email, MAX_CHARS, stdin);
+    fgetss(input.experiencia[0], MAX_CHARS, stdin);
     client_connect(comando, input, &n_profiles);
 
     if (n_profiles == SUCCESS) 
@@ -53,7 +53,7 @@ void listPeopleByMajor(void)
 
     printf("Voce escolheu *LISTAR POR FORMACAO*. Por favor, forneca uma formacao\n\n");
     comando.op = READ;
-    scanf("%s", input.formacao);
+    fgetss(input.formacao, MAX_CHARS, stdin);
     output = client_connect(comando, input, &n_profiles);
 
     for (int i = 0; i < n_profiles; i++)
@@ -82,7 +82,7 @@ void listPeopleBySkill(void)
 
     printf("Voce escolheu *LISTAR POR HABILIDADE*. Por favor, forneca uma habilidade\n\n");
     comando.op = READ;
-    scanf("%s", input.habilidades);
+    fgetss(input.habilidades, MAX_CHARS, stdin);
     output = client_connect(comando, input, &n_profiles);
 
     for (int i = 0; i < n_profiles; i++)
@@ -111,7 +111,12 @@ void listPeopleByGradYear(void)
 
     printf("Voce escolheu *LISTAR POR ANO DE FORMATURA*. Por favor, forneca um ano\n\n");
     comando.op = READ;
-    scanf("%u", &input.ano_formatura);
+    if (!get_uint(&input.ano_formatura))
+    {
+        printf("Ano invalido!\n");
+        return;
+    }
+
     output = client_connect(comando, input, &n_profiles);
 
     for (int i = 0; i < n_profiles; i++)
@@ -125,6 +130,9 @@ void listPeopleByGradYear(void)
     }
     
     printf("Encontrados %d perfis no total!\n", count);
+    
+    if (output)
+        free(output);
 }
 
 void listAll(void)
@@ -155,23 +163,31 @@ void listAll(void)
 
     for (int i = 0; i < n_profiles; i++)
     {
-        printf("*****\nEmail: %s\nNome: %s\nSobrenome: %s\nResidencia: %s\nFormacao: %s\n\
-        Ano de formatura: %d\nHabilidades: %s\nExperiências: ",
-        output[i].email, output[i].nome, 
-        output[i].sobrenome, output[i].residencia, output[i].formacao, output[i].ano_formatura,
-        output[i].habilidades);
-        count++;
-        if(output[i].n_experiencia > 0){
+        printf("*****\nEmail: %s\n", output[i].email);
+        printf("Nome: %s\n", output[i].nome);
+        printf("Sobrenome: %s\n", output[i].sobrenome);
+        printf("Residencia: %s\n", output[i].residencia);
+        printf("Formacao: %s\n", output[i].formacao);
+        printf("Ano de formatura: %u\n", output[i].ano_formatura);
+        printf("Habilidades: %s\n", output[i].habilidades);
+        printf("Experiências:\n");
+        if (output[i].n_experiencia > 0)
+        {
             for (int j = 0; j < output[i].n_experiencia; j++)
             {
-                printf("(%d) %s\n", j+1, output[i].experiencia[j]);
+                printf("\t(%d) %s\n", j + 1, output[i].experiencia[j]);
             }
-        } else{
+        }
+        else
+        {
             printf("Nenhuma!\n\n");
         }
     }
     
     printf("Foram listados %d perfis no total!\n", count);
+    
+    if (output)
+        free(output);
 }
 
 void retrieveProfileInfo(void)
@@ -197,7 +213,9 @@ void retrieveProfileInfo(void)
     UserProfile *output;
     int n_profiles;
 
-    printf("Voce escolheu *LISTAR TODOS PERFIS*\n\n");
+    printf("Voce escolheu *LISTAR UM PERFIL*\n\n");
+    printf("Por favor insira o email que deseja buscar.\n");
+    fgetss(input.email, MAX_CHARS, stdin);
     comando.op = READ;
     output = client_connect(comando, input, &n_profiles);
 
@@ -205,22 +223,31 @@ void retrieveProfileInfo(void)
     {
         if (strcmp(input.email, output[i].email) == 0) 
         {
-            printf("*****\nEmail: %s\nNome: %s\nSobrenome: %s\nResidencia: %s\nFormacao: %s\n\
-            Ano de formatura: %d\nHabilidades: %s\nExperiências: ",
-            output[i].email, output[i].nome, 
-            output[i].sobrenome, output[i].residencia, output[i].formacao, output[i].ano_formatura,
-            output[i].habilidades);
+            printf("*****\nEmail: %s\n", output[i].email);
+            printf("Nome: %s\n", output[i].nome);
+            printf("Sobrenome: %s\n", output[i].sobrenome);
+            printf("Residencia: %s\n", output[i].residencia);
+            printf("Formacao: %s\n", output[i].formacao);
+            printf("Ano de formatura: %u\n", output[i].ano_formatura);
+            printf("Habilidades: %s\n", output[i].habilidades);
+            printf("Experiências:\n");
             if(output[i].n_experiencia > 0){
                 for (int j = 0; j < output[i].n_experiencia; j++)
                 {
-                    printf("(%d) %s\n", j+1, output[i].experiencia[j]);
+                    printf("\t(%d) %s\n", j+1, output[i].experiencia[j]);
                 }
             } else{
                 printf("Nenhuma!\n\n");
             }
+            goto end;
         }
-        break;
     }
+
+    printf("Nenhum perfil encontrado com esse email.\n");
+
+end:
+    if (output)
+        free(output);
 }
 
 void deleteProfile(void)
@@ -232,7 +259,7 @@ void deleteProfile(void)
     int n_profiles;
 
     printf("Voce escolheu *EXCLUIR PERFIL*. Por favor, forneca um email\n\n");
-    scanf("%s", input.email);
+    fgetss(input.email, MAX_CHARS, stdin);
     comando.op = DELETE;
     client_connect(comando, input, &n_profiles);
 
@@ -272,11 +299,13 @@ void registerProfile(void)
     printf("Formacao Academica:\n");
     fgetss(input.formacao, MAX_CHARS, stdin);
     printf("Ano de formatura:\n");
-    get_uint(&input.ano_formatura);
+    while(!get_uint(&input.ano_formatura))
+        printf("Ano invalido, tente novamente\n");
     printf("Habilidades:\n");
     fgetss(input.habilidades, MAX_CHARS, stdin);
     printf("Quantas experiencias quer inserir? (0-20):\n");
-    get_uint(&input.n_experiencia);
+    while(!get_uint(&input.n_experiencia) || input.n_experiencia >= MAX_EXP)
+        printf("Numero invalido, por favor insira um numero entre 0 e 20\n");
     input.n_experiencia = input.n_experiencia < MAX_EXP ? input.n_experiencia : MAX_EXP;
     for (int i = 0; i < input.n_experiencia; i++)
     {
@@ -290,7 +319,7 @@ void registerProfile(void)
     if (n_profiles == SUCCESS) 
     {
         printf("Sucesso!\n");
-    } else{
+    } else {
         printf("Falha!\n");
     }
 }

@@ -71,8 +71,8 @@ static void get_email_from_filename(char *dest, char *filename)
 
 static void fget_uint(FILE *in, uint32_t *dest)
 {
-    char input[8];
-    fgets(input, 8, in);
+    char input[32];
+    fgets(input, 32, in);
     sscanf(input, "%u", dest);
 }
 
@@ -165,6 +165,7 @@ int read_db(UserProfile **profile)
                 fgetss(users[u_idx].nome, sizeof users[u_idx].nome, current_file);
                 fgetss(users[u_idx].sobrenome, sizeof users[u_idx].sobrenome, current_file);
                 fgetss(users[u_idx].residencia, sizeof users[u_idx].residencia, current_file);
+                fgetss(users[u_idx].formacao, sizeof users[u_idx].formacao, current_file);
 
                 // get uint32_t from file
                 fget_uint(current_file, &(users[u_idx].ano_formatura));
@@ -206,7 +207,7 @@ int update_user(UserProfile *profile)
     if (profile)
     {
         GET_FILENAME(filename, profile->email);
-        db_file = fopen(profile->email, "r");
+        db_file = fopen(filename, "r");
         if (db_file)
         {
             db_file = freopen(NULL, "a", db_file);

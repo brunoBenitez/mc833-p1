@@ -47,7 +47,7 @@ UserProfile *client_connect(ProtocolData comando, UserProfile prof_buf, int *n_p
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = AI_NUMERICHOST;
-	if ((rv = getaddrinfo("177.76.153.100", PORT, &hints, &servinfo)) != 0) { // Alterar NULL caso necessario
+	if ((rv = getaddrinfo("192.168.15.15", PORT, &hints, &servinfo)) != 0) { // Alterar NULL caso necessario
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
 		return NULL;
 	}
@@ -93,17 +93,32 @@ UserProfile *client_connect(ProtocolData comando, UserProfile prof_buf, int *n_p
 	prof_buf.n_experiencia = htonl(prof_buf.n_experiencia);
 	memcpy(buf+protocol_bytes, &prof_buf, profile_bytes);
 
-	if (send(sockfd, buf, protocol_bytes + profile_bytes, 0) == -1)
-		perror("send");
+	int sent_bytes;
+	int total_sent = 0;
+	do{
+		if ((sent_bytes = send(sockfd, buf+total_sent, protocol_bytes + profile_bytes - total_sent, 0)) == -1){
+			perror("send");
+			return NULL;
+		} else{
+			total_sent += sent_bytes;
+		}
+	} while(total_sent < profile_bytes + protocol_bytes);
 
 	// Recebimento da resposta inicial (ProtocolData)
+	int total_recv = 0;
 
-	if ((numbytes = recv(sockfd, buf, protocol_bytes, 0)) == -1) {
-	    perror("recv");
-	    exit(1);
-	}
+	do{
+		if ((numbytes = recv(sockfd, buf+total_recv, protocol_bytes-total_recv, 0)) == -1) {
+	    	perror("recv");
+	    	return NULL;
+		} else{
+			total_recv += numbytes;
+		}
+	} while(total_recv < protocol_bytes);
+	
+	
 
-	buf[numbytes] = '\0';
+	//buf[total_recv] = '\0';
 
 	printf("client: received '%s'\n",buf);
 	ProtocolData resposta;
@@ -129,10 +144,15 @@ UserProfile *client_connect(ProtocolData comando, UserProfile prof_buf, int *n_p
 	// Receber N Profiles
 	for (size_t i = 0; i < resposta.profiles_num; i++)
 	{
-		if ((numbytes = recv(sockfd, buf, profile_bytes, 0)) == -1) {
-	    	perror("recv");
-	    	exit(1);
-		}
+		total_recv = 0;
+		do{
+			if ((numbytes = recv(sockfd, buf+total_recv, profile_bytes-total_recv, 0)) == -1) {
+	    		perror("recv");
+	    		return NULL;
+			} else{
+				total_recv += numbytes;
+			}
+		} while(total_recv < profile_bytes);
 
 		// Transferir para a lista
 		memcpy(&(profile_list[i]), buf, profile_bytes);

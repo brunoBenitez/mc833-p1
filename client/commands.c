@@ -163,6 +163,7 @@ void listAll(void)
 
     for (int i = 0; i < n_profiles; i++)
     {
+        count++;
         printf("*****\nEmail: %s\n", output[i].email);
         printf("Nome: %s\n", output[i].nome);
         printf("Sobrenome: %s\n", output[i].sobrenome);

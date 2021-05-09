@@ -20,6 +20,17 @@
 
 #define MAXDATASIZE 4098 // max number of bytes we can get at once 
 
+char server_ip[MAX_CHARS];
+
+void set_server_ip(void){
+	for(int i = 0; i < MAX_CHARS; i++){
+		server_ip[i] = '\0';
+	}
+	printf("Por favor, insira o endereco IP do servidor antes de iniciar as operacoes:\n");
+	fgetss(server_ip, MAX_CHARS, stdin);
+	return;
+}
+
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
 {
@@ -47,7 +58,7 @@ UserProfile *client_connect(ProtocolData comando, UserProfile prof_buf, int *n_p
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = AI_NUMERICHOST;
-	if ((rv = getaddrinfo("192.168.15.15", PORT, &hints, &servinfo)) != 0) { // Alterar NULL caso necessario
+	if ((rv = getaddrinfo(server_ip, PORT, &hints, &servinfo)) != 0) { // Alterar NULL caso necessario
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
 		return NULL;
 	}
@@ -119,8 +130,8 @@ UserProfile *client_connect(ProtocolData comando, UserProfile prof_buf, int *n_p
 	
 
 	//buf[total_recv] = '\0';
-
-	printf("client: received '%s'\n",buf);
+	//printf("client: received '%s'\n",buf);
+	
 	ProtocolData resposta;
 	UserProfile *profile_list;
 

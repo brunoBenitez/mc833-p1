@@ -6,6 +6,8 @@ int main(int argc, char **argv)
     char command;
     AccountType accountType;
 
+    set_server_ip();
+
     accountType = login();
 
     command = showMenu(accountType);

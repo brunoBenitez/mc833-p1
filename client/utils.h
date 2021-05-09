@@ -26,3 +26,6 @@ AccountType login(void);
 //  a vector of UserProfiles that were read from the server when comando.op == READ with success. 
 //  otherwise returns NULL.
 UserProfile *client_connect(ProtocolData comando, UserProfile prof_buf, int *n_profiles);
+
+// Set the Server IP
+void set_server_ip(void);

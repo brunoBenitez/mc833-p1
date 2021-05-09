@@ -98,7 +98,7 @@ void handle_request(int sock_fd)
     profile_buf = (UserProfile *)(recv_buffer + sizeof(ProtocolData));
 
     // Should all cases send response?
-    printf("Received operation: %u", ntohl(req_data->op));
+    printf("Received operation: %u\n", ntohl(req_data->op));
     switch (ntohl(req_data->op))
     {
     case CREATE:

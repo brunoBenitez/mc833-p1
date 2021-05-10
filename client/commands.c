@@ -27,7 +27,9 @@ void addExperience(void)
     comando.profiles_num = 1;
 
     printf("Voce escolheu *ADICIONAR EXPERIENCIA*. Por favor, forneca um email seguido de apenas uma experiencia\n\n");
+    printf("Email:\n");
     fgetss(input.email, MAX_CHARS, stdin);
+    printf("Experiencia:\n");
     fgetss(input.experiencia[0], MAX_CHARS, stdin);
     client_connect(comando, input, &n_profiles);
 
@@ -41,7 +43,7 @@ void addExperience(void)
 
 void listPeopleByMajor(void)
 {
-    // - get input: major (string?)
+    // - get input: major 
     // - queue server for database
     // - filter database by major
     // - show profiles found with Email and Name
@@ -193,7 +195,7 @@ void listAll(void)
 
 void retrieveProfileInfo(void)
 {
-    // - get input: email (string?)
+    // - get input: email 
     // - queue server for database
     // - find specified email in data
     // - show profile with all info
@@ -286,7 +288,7 @@ void registerProfile(void)
     // 2) send to server
     UserProfile input;
     ProtocolData comando;
-    int n_profiles; // Variavel coringa para n de profiles retornados. pode ser usada para erro?
+    int n_profiles; // Variavel coringa para n de profiles retornados. pode ser usada para erro
 
     printf("Voce escolheu *ADICIONAR NOVO PERFIL*. Por favor, forneca os dados conforme requisitado:\n");
     printf("Email:\n");

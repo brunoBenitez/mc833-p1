@@ -49,16 +49,11 @@ UserProfile *client_connect(ProtocolData comando, UserProfile prof_buf, int *n_p
 	int rv;
 	char s[INET6_ADDRSTRLEN];
 
-	/*if (argc != 2) {
-	    fprintf(stderr,"usage: client hostname\n");
-	    exit(1);
-	}*/
-
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = AI_NUMERICHOST;
-	if ((rv = getaddrinfo(server_ip, PORT, &hints, &servinfo)) != 0) { // Alterar NULL caso necessario
+	if ((rv = getaddrinfo(server_ip, PORT, &hints, &servinfo)) != 0) { 
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
 		return NULL;
 	}
@@ -126,11 +121,6 @@ UserProfile *client_connect(ProtocolData comando, UserProfile prof_buf, int *n_p
 			total_recv += numbytes;
 		}
 	} while(total_recv < protocol_bytes);
-	
-	
-
-	//buf[total_recv] = '\0';
-	//printf("client: received '%s'\n",buf);
 	
 	ProtocolData resposta;
 	UserProfile *profile_list;

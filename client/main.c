@@ -35,10 +35,16 @@ int main(int argc, char **argv)
             retrieveProfileInfo();
             break;
         case '7':
-            deleteProfile();
+            if(accountType == ADMIN){
+                deleteProfile();
+                break;
+            }
             break;
         case '8':
-            registerProfile();
+            if(accountType == ADMIN){
+                registerProfile();
+                break;
+            }
             break;
         default:
             break;

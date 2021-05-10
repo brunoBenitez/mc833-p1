@@ -29,7 +29,7 @@ static size_t get_dir_filenames(char *dirname, char ***namelist)
     if (data_dir)
     {
         n_files = 0;
-        filenames = malloc(cap * sizeof(char));
+        filenames = malloc(cap * sizeof(char*));
         // read ./data directory and store entries names on filename_list.
         while ((dir_entry = readdir(data_dir)) != NULL)
         {
